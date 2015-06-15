@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Define where videos and logs are located locally.
+VIDEODIR=/mnt/picam/video/
+LOGDIR=/mnt/picam/logs/
+
+#Define the maximum desired age (in days) for videos and logs
+VIDEOMAXAGE=7
+LOGMAXAGE=180
+
+# Find and delete videos older than the maximum desired age.
+find $VIDEODIR -type f -mtime +$VIDEOMAXAGE -exec rm {} \;
+
+# Find and delete logs older than the maximum desired age.
+find $LOGDIR -type f -mtime +$LOGMAXAGE -exec rm {} \;

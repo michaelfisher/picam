@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# AWS credentials are necessary for this script to work properly.
+# The aws_credentials file may be stored anywhere, but I keep in etc/motion/ for the sake of keeping things together.
+# The aws_credentials file should be an executable Bash script similar to the following:
+#
+# #!/bin/bash
+# export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXX
+# export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# Make AWS credentials available to the AWS commands used in this script.
+source /etc/motion/aws_credentials
+
+# Define local and destination directory for the sync.
+LOGDIR=/mnt/picam/logs
+S3_LOGDIR=s3://home.fisher/picam/logs
+
+# Sync logs to S3
+/usr/local/bin/aws s3 sync $LOGDIR $S3_LOGDIR
