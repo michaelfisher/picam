@@ -1,18 +1,15 @@
 #!/bin/bash
 
-# Authorized occupant names and Bluetooth addresses are necessary for this script to work properly.
-# The names_bt file may be stored anywhere, but I keep in etc/motion/ for the sake of keeping things together.
-# The names_bt file should be an executable Bash script similar to the following:
+# Authorized Bluetooth addresses are necessary for this script to work properly.
+# The bt_devices file may be stored anywhere, but I keep in etc/motion/ for the sake of keeping things together.
+# The bt_devices file should be an executable Bash script similar to the following:
 #
 # #!/bin/bash
-# export PERSON1=Name
 # export DEVICE1=XX:XX:XX:XX:XX:XX
-#
-# export PERSON2=Name
 # export DEVICE2=XX:XX:XX:XX:XX:XX
 
 # Make person names and device BT addresses available to this script.
-source /etc/motion/names_bt
+source /etc/motion/bt_devices
 
 # Person based variables
 # Get the current occupancy status of Person 1.
@@ -28,7 +25,8 @@ OVERRIDEBEGIN=2200
 OVERRIDEEND=0600
 
 # Motion program based vaiables
-# Get the PID of motion, define the credentials needed to access the motion control port, get the status of the default motion/camera thread (0).
+# Get the PID of motion, define the credentials needed to access the motion control port (defined in motion.conf),
+# get the status of the default motion/camera thread (0).
 MOTIONPID=`/bin/pidof motion`
 CREDENTIALS="pi:raspberry"
 MOTIONSTATUS_0=`/usr/bin/lwp-request -C $CREDENTIALS http://localhost:8080/0/detection/status`
@@ -56,11 +54,11 @@ LASTLOG=`tail -n 1 $LOGFILE`
 
 ### If Motion is running... ###
 if [ "$MOTIONPID" ]; then
-    ### If both devices are present... ###
-    if [ "$STATUS1" != "" ] && [ "$STATUS2" != "" ]; then
+    ### If any devices are present... ###
+    if [ "$STATUS1" != "" ] || [ "$STATUS2" != "" ]; then
         #Update the log if the last logs aren't the same as the current status.
-        if [[ "$LASTLOG" != *"$PERSON1 and $PERSON2 are home."* ]]; then
-            /bin/echo "[$TIMESTAMP] $PERSON1 and $PERSON2 are home." >> $LOGFILE
+        if [[ "$LASTLOG" != *"Occupied."* ]]; then
+            /bin/echo "[$TIMESTAMP] Occupied." >> $LOGFILE
         fi
         #If Motion IS actively recording, AND the time IS NOT within the specified override hours, then PAUSE the recording.    
         if [[ "$MOTIONSTATUS_0" == *"ACTIVE"* ]]; then
@@ -77,53 +75,11 @@ if [ "$MOTIONPID" ]; then
                 /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
             fi
         fi
-    ### If only Device 1 is present... ###
-    elif [ "$STATUS1" != "" ]; then
-        #Update the log if the last logs aren't the same as the current status.
-        if [[ "$LASTLOG" != *"$PERSON1 is home."* ]]; then
-            /bin/echo "[$TIMESTAMP] $PERSON1 is home." >> $LOGFILE
-        fi
-        #If Motion IS actively recording, AND the time IS NOT within the specified override hours, then PAUSE the recording.    
-        if [[ "$MOTIONSTATUS_0" == *"ACTIVE"* ]]; then
-            if [ "$CURRENTTIME" -ge "$OVERRIDEEND" ] && [ "$CURRENTTIME" -lt "$OVERRIDEBEGIN" ]; then
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/pause" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+PAUSED" > /dev/null
-                /bin/echo "[$TIMESTAMP] Motion detection PAUSED." >> $LOGFILE
-            fi
-        #If Motion IS NOT actively recording, AND the time IS within the specified override hours, then START the recording.
-        elif [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
-            if [ "$CURRENTTIME" -ge "$OVERRIDEBEGIN" ] || [ "$CURRENTTIME" -lt "$OVERRIDEEND" ]; then
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+ACTIVE" > /dev/null
-                /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
-            fi
-        fi
-    ### If only Device 2 is present... ###
-    elif [ "$STATUS2" != "" ]; then
-        #Update the log if the last logs aren't the same as the current status.
-        if [[ "$LASTLOG" != *"$PERSON2 is home."* ]]; then
-            /bin/echo "[$TIMESTAMP] $PERSON2 is home." >> $LOGFILE
-        fi
-        #If Motion IS actively recording, AND the time IS NOT within the specified override hours, then PAUSE the recording.    
-        if [[ "$MOTIONSTATUS_0" == *"ACTIVE"* ]]; then
-            if [ "$CURRENTTIME" -ge "$OVERRIDEEND" ] && [ "$CURRENTTIME" -lt "$OVERRIDEBEGIN" ]; then
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/pause" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+PAUSED" > /dev/null
-                /bin/echo "[$TIMESTAMP] Motion detection PAUSED." >> $LOGFILE
-            fi
-        #If Motion IS NOT actively recording, AND the time IS within the specified override hours, then START the recording.
-        elif [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
-            if [ "$CURRENTTIME" -ge "$OVERRIDEBEGIN" ] || [ "$CURRENTTIME" -lt "$OVERRIDEEND" ]; then
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+ACTIVE" > /dev/null
-                /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
-            fi
-        fi
-	### If no devices are present... ###
+    ### If no devices are present... ###
     elif [ "$STATUS1" == "" ] && [ "$STATUS2" == "" ]; then
         #Update the log if the last logs aren't the same as the current status.
-        if [[ "$LASTLOG" != *"No one is home."* ]]; then
-            /bin/echo "[$TIMESTAMP] No one is home." >> $LOGFILE
+        if [[ "$LASTLOG" != *"Unoccupied."* ]]; then
+            /bin/echo "[$TIMESTAMP] Unoccupied." >> $LOGFILE
         fi
         #If Motion IS NOT actively recording, then START the recording.
         if [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
