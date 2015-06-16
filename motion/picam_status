@@ -59,20 +59,21 @@ if [ "$MOTIONPID" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Occupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Occupied." >> $LOGFILE
+            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_left=Camera+1%5CnOCCUPIED" > /dev/null
         fi
         #If Motion IS actively recording, AND the time IS NOT within the specified override hours, then PAUSE the recording.    
         if [[ "$MOTIONSTATUS_0" == *"ACTIVE"* ]]; then
             if [ "$CURRENTTIME" -ge "$OVERRIDEEND" ] && [ "$CURRENTTIME" -lt "$OVERRIDEBEGIN" ]; then
                 /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/pause" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+PAUSED" > /dev/null
                 /bin/echo "[$TIMESTAMP] Motion detection PAUSED." >> $LOGFILE
+                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnPAUSED" > /dev/null
             fi
         #If Motion IS NOT actively recording, AND the time IS within the specified override hours, then START the recording.
         elif [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
             if [ "$CURRENTTIME" -ge "$OVERRIDEBEGIN" ] || [ "$CURRENTTIME" -lt "$OVERRIDEEND" ]; then
                 /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+ACTIVE" > /dev/null
                 /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
+                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnACTIVE" > /dev/null
             fi
         fi
     ### If no devices are present... ###
@@ -80,12 +81,13 @@ if [ "$MOTIONPID" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Unoccupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Unoccupied." >> $LOGFILE
+            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_left=Camera+1%5CnUNOCCUPIED" > /dev/null
         fi
         #If Motion IS NOT actively recording, then START the recording.
         if [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
             /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnMotion+ACTIVE" > /dev/null
             /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
+            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnACTIVE" > /dev/null
         fi
     fi
 ### If Motion is not running... ###
