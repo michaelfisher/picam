@@ -1,4 +1,0 @@
-#!/bin/bash
-
-export DEVICE1=B8:E8:56:B6:40:1E
-export DEVICE2=60:92:17:26:AB:6E

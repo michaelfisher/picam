@@ -12,11 +12,30 @@
 source /etc/motion/bt_devices
 
 # Person based variables
-# Get the current occupancy status of Person 1.
-STATUS1=`/usr/bin/hcitool name $DEVICE1`
+# If DEVICE1 is defined and is not empty, get the current occupancy status of Person 1.
+if [[ -n ${DEVICE1-} ]]; then
+    STATUS1=`/usr/bin/hcitool name $DEVICE1`
+else
+    STATUS1="UNDEFINED"
+fi
 
-# Get the current occupancy status of Person 2.
-STATUS2=`/usr/bin/hcitool name $DEVICE2`
+# If DEVICE2 is defined and is not empty, get the current occupancy status of Person 2.
+if [[ -n ${DEVICE2-} ]]; then
+    STATUS2=`/usr/bin/hcitool name $DEVICE2`
+else
+    STATUS2="UNDEFINED"
+fi
+
+# Use the following as a template for adding more devices.
+# Be mindful that searching for a non-existent device takes about 5 seconds to timeout,
+# So, it may be unwise to define EVERY member of a household.
+
+# If DEVICEX is defined and is not empty, get the current occupancy status of Person X.
+#if [[ -n ${DEVICEX-} ]]; then
+#    STATUSX=`/usr/bin/hcitool name $DEVICEX`
+#else
+#    STATUSX="UNDEFINED"
+#fi
 
 # Time based variables
 # Get the current time, define the time window within which to force motion detection.
@@ -55,7 +74,10 @@ LASTLOG=`tail -n 1 $LOGFILE`
 ### If Motion is running... ###
 if [ "$MOTIONPID" ]; then
     ### If any devices are present... ###
-    if [ "$STATUS1" != "" ] || [ "$STATUS2" != "" ]; then
+    # Don't forget to add a condition for any additional devices you may have added.
+    # Example to add STATUSX:
+    # if [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ] || [ "$STATUSX" != "UNDEFINED" ]; then...
+    if [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Occupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Occupied." >> $LOGFILE
@@ -72,12 +94,15 @@ if [ "$MOTIONPID" ]; then
         elif [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
             if [ "$CURRENTTIME" -ge "$OVERRIDEBEGIN" ] || [ "$CURRENTTIME" -lt "$OVERRIDEEND" ]; then
                 /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-                /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
-                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnACTIVE" > /dev/null
+                /bin/echo "[$TIMESTAMP] Motion detection STARTED." >> $LOGFILE
+                /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnSTANDBY" > /dev/null
             fi
         fi
     ### If no devices are present... ###
-    elif [ "$STATUS1" == "" ] && [ "$STATUS2" == "" ]; then
+    # Don't forget to add a condition for any additional devices you may have added.
+    # Example to add STATUSX:
+    # elif [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ] || [ "$STATUSX" != "UNDEFINED" ]; then...
+    elif [ "$STATUS1" == "UNDEFINED" ] && [ "$STATUS2" == "UNDEFINED" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Unoccupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Unoccupied." >> $LOGFILE
@@ -86,8 +111,8 @@ if [ "$MOTIONPID" ]; then
         #If Motion IS NOT actively recording, then START the recording.
         if [[ "$MOTIONSTATUS_0" == *"PAUSE"* ]]; then
             /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/detection/start" > /dev/null
-            /bin/echo "[$TIMESTAMP] Motion detection ACTIVE." >> $LOGFILE
-            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnACTIVE" > /dev/null
+            /bin/echo "[$TIMESTAMP] Motion detection STARTED." >> $LOGFILE
+            /usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnSTANDBY" > /dev/null
         fi
     fi
 ### If Motion is not running... ###

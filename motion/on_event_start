@@ -1,0 +1,27 @@
+#!/bin/bash
+
+CREDENTIALS="pi:raspberry"
+
+# Log based variables
+# Define the local logging directory, set the format for the logfile name, define the local logfile, get the last line of the current logfile,
+# define the S3 logging directory, define the format of the timestamp used within the logs.
+LOGDIR=/mnt/picam/logs
+LOGNAME=`/bin/date +'%F'`
+LOGFILE=$LOGDIR/$LOGNAME.log
+TIMESTAMP=`/bin/date +'%F %R'`
+
+#Make sure log directory exists.
+if [ ! -d "$LOGDIR" ]; then
+    /bin/mkdir -p $LOGDIR
+fi
+
+#Make sure there is at least an empty logfile.
+if [ ! -f "$LOGFILE" ]; then
+    /bin/touch $LOGFILE
+fi
+
+# Set the right text to reflect the RECORDING status.
+/usr/bin/lwp-request -C $CREDENTIALS "http://localhost:8080/0/config/set?text_right=%25Y-%25m-%25d+%25H%3A%25M%5CnRECORDING" > /dev/null
+
+# Update the log to show the time the event started.
+/bin/echo "[$TIMESTAMP] Recording started..." >> $LOGFILE
