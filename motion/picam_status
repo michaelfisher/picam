@@ -16,14 +16,14 @@ source /etc/motion/bt_devices
 if [[ -n ${DEVICE1-} ]]; then
     STATUS1=`/usr/bin/hcitool name $DEVICE1`
 else
-    STATUS1="UNDEFINED"
+    STATUS1=""
 fi
 
 # If DEVICE2 is defined and is not empty, get the current occupancy status of Person 2.
 if [[ -n ${DEVICE2-} ]]; then
     STATUS2=`/usr/bin/hcitool name $DEVICE2`
 else
-    STATUS2="UNDEFINED"
+    STATUS2=""
 fi
 
 # Use the following as a template for adding more devices.
@@ -76,8 +76,8 @@ if [ "$MOTIONPID" ]; then
     ### If any devices are present... ###
     # Don't forget to add a condition for any additional devices you may have added.
     # Example to add STATUSX:
-    # if [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ] || [ "$STATUSX" != "UNDEFINED" ]; then...
-    if [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ]; then
+    # if [ "$STATUS1" != "" ] || [ "$STATUS2" != "" ] || [ "$STATUSX" != "" ]; then...
+    if [ "$STATUS1" != "" ] || [ "$STATUS2" != "" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Occupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Occupied." >> $LOGFILE
@@ -101,8 +101,8 @@ if [ "$MOTIONPID" ]; then
     ### If no devices are present... ###
     # Don't forget to add a condition for any additional devices you may have added.
     # Example to add STATUSX:
-    # elif [ "$STATUS1" != "UNDEFINED" ] || [ "$STATUS2" != "UNDEFINED" ] || [ "$STATUSX" != "UNDEFINED" ]; then...
-    elif [ "$STATUS1" == "UNDEFINED" ] && [ "$STATUS2" == "UNDEFINED" ]; then
+    # elif [ "$STATUS1" != "" ] || [ "$STATUS2" != "" ] || [ "$STATUSX" != "" ]; then...
+    elif [ "$STATUS1" == "" ] && [ "$STATUS2" == "" ]; then
         #Update the log if the last logs aren't the same as the current status.
         if [[ "$LASTLOG" != *"Unoccupied."* ]]; then
             /bin/echo "[$TIMESTAMP] Unoccupied." >> $LOGFILE
@@ -121,4 +121,4 @@ elif [ "$MOTIONPID" == "" ]; then
 fi
 
 # Sync logs to S3
-/etc/motion/log_sync
+/etc/motion/log_sync > /dev/null

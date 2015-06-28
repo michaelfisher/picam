@@ -15,5 +15,10 @@ source /etc/motion/aws_credentials
 VIDEODIR=/mnt/picam/video
 S3_VIDEODIR=s3://home.fisher/picam/video
 
-# Sync everything to S3
-/usr/local/bin/aws s3 sync $VIDEODIR $S3_VIDEODIR
+# Test if the internet is reachable
+/usr/bin/wget --quiet --spider http://google.com
+if [ "$?" = 0 ]; then
+    # Sync videos to S3
+	/usr/local/bin/aws s3 sync $VIDEODIR $S3_VIDEODIR
+fi
+

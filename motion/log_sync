@@ -15,5 +15,9 @@ source /etc/motion/aws_credentials
 LOGDIR=/mnt/picam/logs
 S3_LOGDIR=s3://home.fisher/picam/logs
 
-# Sync logs to S3
-/usr/local/bin/aws s3 sync $LOGDIR $S3_LOGDIR
+# Test if the internet is reachable
+/usr/bin/wget --quiet --spider http://google.com
+if [ "$?" = 0 ]; then
+    # Sync logs to S3
+	/usr/local/bin/aws s3 sync $LOGDIR $S3_LOGDIR
+fi
