@@ -40,8 +40,10 @@ fi
 # Time based variables
 # Get the current time, define the time window within which to force motion detection.
 CURRENTTIME=`/bin/date +'%H%M'`
-OVERRIDEBEGIN=2200
-OVERRIDEEND=0600
+# Regardless of occupancy status, detect motion from this time (evening)...
+OVERRIDEBEGIN=2300
+# Until this time (morning)
+OVERRIDEEND=0430
 
 # Motion program based vaiables
 # Get the PID of motion, define the credentials needed to access the motion control port (defined in motion.conf),
