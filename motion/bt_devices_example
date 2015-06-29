@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Name 1
+export DEVICE1=AA:AA:AA:AA:AA:AA
+
+# Name 2
+export DEVICE2=BB:BB:BB:BB:BB:BB
+
