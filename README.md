@@ -1,5 +1,6 @@
 # PiCam
-A Raspberry Pi based motion sensing, and Bluetooth enabled, security camera.
+A Raspberry Pi based motion sensing, and Bluetooth enabled, security camera. The basic idea is that the Pi is aware of Bluetooth devices in its vicinity, and will only detect/record motion events when specified devices are not within range. For example: You could specify your iPhone's BT address and your spouse's, but not your children's. The Pi would NOT detect/record motion events when you and your spouse are home, but if the kids were home alone, it would be detecting/recording motion events.
+
 Feel free to make suggestions or use the code for your own project.
 
 ### What hardware you'll need
