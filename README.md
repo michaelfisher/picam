@@ -8,7 +8,7 @@ Feel free to make suggestions or use the code for your own project.
 * A power supply and MicroSD card (I used a 32GB card)
 * The Raspberry Pi camera module (or the PiNoIR module)
 * A Bluetooth adapter (I used the Kinivo BTD-400 purchased on [Amazon.com](http://www.amazon.com/Kinivo-BTD-400-Bluetooth-4-0-adapter/dp/B007Q45EF4))
-* Nwazet Pi Camera Box Bundle (purchased from [ModMyPi.com](http://www.modmypi.com/raspberry-pi/camera/nwazet-pi-camera-box-bundle-case,-lens-and-wall-mount-b-plus)) *optional*
+* Nwazet Pi Camera Box Bundle (purchased from [ModMyPi.com](http://www.modmypi.com/raspberry-pi/camera/nwazet-pi-camera-box-bundle-case,-lens-and-wall-mount-b-plus)) *optional, but damn sexy*
 
 ### Putting it all together:
 ##### Install the Operating System
@@ -24,5 +24,8 @@ Feel free to make suggestions or use the code for your own project.
 ##### Install the software
 * Motion is the core of this camera project, and tons of info can be found at the project's [homepage](http://www.lavrsen.dk/foswiki/bin/view/Motion). Motion-MMAL is a version of Motion that supports the Raspberry Pi camera module. Download it by running: `wget https://www.dropbox.com/s/jw5r1wss32tdibb/motion-mmal-opt.tar.gz`
 * In order to utilize the Bluetooth functionality, you'll need to install software to interface with the Bluetooth adapter plugged in to your Pi. Run `sudo apt-get install --no-install-recommends bluetooth`. Then, to test if it is working, run `sudo service bluetooth status`. The Pi should report that the service is running. If not, reboot and run that command again. Once Bluetooth is running, run `hcitool scan` to see a list of discoverable devices nearby.
-* To utilize the Amazon S3 storage features of the camera, you'll need to do a few things. First you'll need to have a bucket on Amazon's S3 service where your files will be stored. Second, you'll need an AWS user with permissions to access that bucket. FInally, you need a way for the Pi to access that bucket. The AWS-CLI (Command Line Interface) is the way the Pi will interface with S3. To install AWS-CLI, run `sudo apt-get install python-pip`, followed by `sudo pip install awscli`.
+* To utilize the Amazon S3 storage features of the camera, you'll need to do a few things. First you'll need to have a bucket on Amazon's S3 service where your files will be stored. Second, you'll need an AWS user with permissions to access that bucket. Finally, you need a way for the Pi to access that bucket. The AWS-CLI (Command Line Interface) is the way the Pi will interface with S3. To install AWS-CLI, run `sudo apt-get install python-pip`, followed by `sudo pip install awscli`.
+
+##### Setup Amazon account
+If you don't already have an AWS account, you will need to setup a bucket in Amazon's Simple Storage Service (S3). A bucket is a storage place for objects (files). You can create and manage buckets through Amazon's [web console] (https://console.aws.amazon.com/s3/home).
 
